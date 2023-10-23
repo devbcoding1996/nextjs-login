@@ -1,12 +1,15 @@
+import { connectMongoDB } from "@/app/libs/mongodb";
+import User from "@/app/models/user";
 import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 
-export async function POST(req: any) {
+export async function POST(req) {
   try {
-    const { fullName, email, password } = req.json();
+    const { fullName, email, password } = await req.json();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log("FullName", fullName);
-    console.log("Email", email);
-    console.log("Password", password);
+    await connectMongoDB();
+    await User.create({ fullName, email, password: hashedPassword });
 
     return NextResponse.json({ message: "User registered." }, { status: 201 });
   } catch (error) {
